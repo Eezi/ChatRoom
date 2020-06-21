@@ -2,9 +2,25 @@ const express = require('express');
 const app = express();
 const http = require('http').Server(app);
 const io = require('socket.io')(http);
+const mongoose = require('mongoose');
 let users = [];
 let messages = [];
 let index = 0;
+
+mongoose.connect("mongodb://localhost:27017/vue_fullstack");
+
+const ChatSchema = mongoose.Schema({
+    username: String,
+    msg: String
+});
+
+const ChatModel = mongoose.model("chat", ChatSchema);
+
+ChatModel.find((err, result) => {
+    if(err) throw err;
+
+    messages = result;
+})
 
 //Event listener
 io.on("connection", socket => {

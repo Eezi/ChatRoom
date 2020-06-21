@@ -5,20 +5,23 @@
       <p class="username">Username: {{ username }}</p>
       <p class="online">Online: {{ users.length }}</p>
     </div>
-    
+    <Chatroom v-bind:messages="messages" v-on:sendMessage="this.sendMessage" />
   </div>
 </template>
 
 <script>
 import io from 'socket.io-client';
+import Chatroom from './components/Chatroom';
 
 export default {
   name: 'App',
-  components: {},
+  components: {
+    Chatroom
+  },
   data: function() {
     return {
       username: "",
-      socket: io("http://localhost:3000"),
+      socket: io("http://localhost:8080"),
       messages: [],
       users: []
     }
@@ -35,13 +38,22 @@ export default {
       this.listen();
     },
     listen: function() {
+      
       this.socket.on('userOnline', user => {
         this.users.push(user);
-         console.log(this.users)
+        
       });
+
       this.socket.on('userLeft', user => {
         this.users.splice(this.users.indexOf(user), 1); 
-      })
+      });
+
+      this.socket.on("msg", message => {
+        this.messages.push(message)
+      });
+    },
+    sendMessage: function(message) {
+      this.socket.emit('msg', message);
     }
   },
   mounted: function() {
@@ -75,13 +87,16 @@ h1 {
 }
 
 #app {
-  border: solid 20px #4b89ac;
-  border-radius: 5%;
+  padding: 20px;
+  box-sizing: border-box;
+  border: solid 20px #393e46;
+  border-radius: 2%;
   display: flex;
   flex-direction: column;
+  background-color: #00adb5;
   height: 100vh;
   width: 100%;
   max-width: 768px;
-  margin: 0 auto;
+  margin: 5px auto;
 }
 </style>
